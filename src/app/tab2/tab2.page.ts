@@ -1,4 +1,6 @@
 import { Component } from '@angular/core';
+import { DeliveredNotificationSchema, LocalNotifications } from '@capacitor/local-notifications';
+import { NavController } from '@ionic/angular';
 
 @Component({
   selector: 'app-tab2',
@@ -6,7 +8,15 @@ import { Component } from '@angular/core';
   styleUrls: ['tab2.page.scss']
 })
 export class Tab2Page {
+  recordatorios : DeliveredNotificationSchema [] = [];
+  constructor(private navCtrl: NavController) {
 
-  constructor() {}
+  }
+
+  ionViewWillEnter(){
+    LocalNotifications.getDeliveredNotifications().then(list => {
+       this.recordatorios = list.notifications.filter(item => !item.group && item.id > 1);
+    });
+  }
 
 }

@@ -15,6 +15,17 @@ export class Tab1Page {
 
   constructor(private changeDetectorRef: ChangeDetectorRef, private router: Router) { 
     SpeechRecognition.requestPermission();
+    LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
+      this.guardarDina(notification.notification.title).then(asdasd => {
+        this.findbytitle(notification.notification.title).then(res => {
+          console.log('/remind/' + res)
+          this.router.navigate(['/remind/' + res]);
+        })
+      }).catch(err => {
+        alert("Error al reestablecer el recordatorio");
+      });
+      
+    });
   }
 
   ionViewWillEnter(){
@@ -32,12 +43,7 @@ export class Tab1Page {
         prompt: "Hable ahora",
         partialResults: true,
         popup: false,
-      });
-
-      LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
-        console.log('/remind/' + notification.notification.id)
-        this.router.navigate(['/remind/' + notification.notification.id]);
-      });
+      });      
 
       SpeechRecognition.addListener("partialResults", (data: any) => {
         console.log("partialResults was fired", data.matches);
@@ -55,6 +61,25 @@ export class Tab1Page {
     } 
   }
 
+  async guardarDina(tit : string) {
+    let opcions : ScheduleOptions = {
+      notifications: [
+        {
+          id: await this.getLastId(),
+          title: tit,
+          body: tit,
+          ongoing: true,
+          autoCancel: false,
+        }
+      ]
+    }    
+    LocalNotifications.schedule(opcions).then(() =>{
+      this.titulo = "";
+    }).catch(err => {
+    });
+    
+  }
+
   async guardar() {
     let opcions : ScheduleOptions = {
       notifications: [
@@ -67,6 +92,8 @@ export class Tab1Page {
         }
       ]
     }
+
+    
     LocalNotifications.schedule(opcions).then(() =>{
       this.titulo = "";
       alert("Recordatorio Guardado");
@@ -78,7 +105,7 @@ export class Tab1Page {
 
   async getLastId() : Promise<number>{
     let temp : DeliveredNotificationSchema[] = await this.getList();
-    temp = temp.filter(item => !item.group && item.id > 1);
+    temp = temp.filter(item => !item.group);
     console.log(temp);
     if(temp.length > 0 ) {
       let objMax = temp.reduce((max, curren) => max.id > curren.id ? max : curren);
@@ -88,6 +115,16 @@ export class Tab1Page {
       return 2;
     }
     
+  }
+
+  async findbytitle(tit : string) {
+    let temp : DeliveredNotificationSchema[] = await this.getList();
+    temp = temp.filter(item => !item.group);
+    console.log(temp);
+    console.log(tit);
+    let temp2 = temp.find(item => {return item.title == tit});
+    console.log(temp2);
+    return temp2?.id;
   }
 
   async getList() : Promise<DeliveredNotificationSchema[]>{

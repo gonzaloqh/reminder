@@ -11,26 +11,8 @@ import { ScheduleOptions } from '@capacitor/local-notifications/dist/esm/definit
 })
 export class AppComponent {
   constructor(private platform : Platform) {
-    this.platform.ready().then(() => {      
-      this.initializeApp();
+    this.platform.ready().then(() => {
     })
   }
 
-  initializeApp() {
-    LocalNotifications.requestPermissions();
-    let opcions : ScheduleOptions = {
-      notifications: [
-        {
-          id: 1,
-          title: "Recordatorio",
-          body: "Presiona para agregar recordatorio rápido",
-          ongoing: true,
-          autoCancel: false,
-        }
-      ]
-    }
-
-    LocalNotifications.schedule(opcions).then(() =>{});
-
-  }
 }

@@ -1,17 +1,89 @@
 <ion-header [translucent]="true">
   <ion-toolbar>
-    <ion-title>
-      Tab 3
-    </ion-title>
+    <ion-buttons slot="start" slot="secondary">
+      <ion-button size="large" (click)="addMember()">
+        <ion-icon slot="start" name="person-add-outline"></ion-icon> Miembro
+      </ion-button>      
+    </ion-buttons>
+    <ion-title>Calculadora</ion-title>
+    <ion-buttons slot="end" slot="primary">
+      <ion-button (click)="addCommon()">        
+       <ion-icon slot="start" name="cash-outline"></ion-icon>
+       Gastos
+      </ion-button>
+    </ion-buttons>
   </ion-toolbar>
 </ion-header>
 
 <ion-content [fullscreen]="true">
-  <ion-header collapse="condense">
-    <ion-toolbar>
-      <ion-title size="large">Tab 3</ion-title>
-    </ion-toolbar>
-  </ion-header>
+  <ion-accordion-group [multiple]="true">
+    <ion-accordion *ngFor="let miembro of data.miembros">
+      <ion-item slot="header" color="light">
+        <ion-label>{{miembro.nombre}}</ion-label>
+      </ion-item>
+      <div class="ion-padding" slot="content">
+        <ion-list *ngFor="let gastoP of miembro.gastos">
+          <ion-item-sliding *ngIf="gastoP.tipo === 'P'">
+            <ion-item>
+              <ion-badge slot="end" color="primary">S/.{{gastoP.monto| number : '1.2-2'}}</ion-badge>
+              <ion-label>{{gastoP.nombre}}</ion-label>
+            </ion-item>        
+            <ion-item-options>
+              <ion-item-option color="danger">Eliminar</ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>          
+        </ion-list>
+        <ion-list *ngFor="let gastoC of miembro.gastos">
+          <ion-item-sliding *ngIf="gastoC.tipo === 'C'">
+            <ion-item>
+              <ion-badge slot="end" color="warning">S/.{{gastoC.monto| number : '1.2-2'}}</ion-badge>
+              <ion-label>{{gastoC.nombre}}</ion-label>
+            </ion-item>        
+            <ion-item-options>
+              <ion-item-option color="danger">Eliminar</ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>          
+        </ion-list>       
+        <ion-list *ngFor="let pago of miembro.pagos">
+          <ion-item-sliding>
+            <ion-item>
+              <ion-badge slot="end" color="danger">S/.{{pago.monto| number : '1.2-2'}}</ion-badge>
+              <ion-label>Pago</ion-label>
+            </ion-item>        
+            <ion-item-options>
+              <ion-item-option color="danger">Eliminar</ion-item-option>
+            </ion-item-options>
+          </ion-item-sliding>          
+        </ion-list>
 
-  <app-explore-container name="Tab 3 page"></app-explore-container>
+
+        <ion-list lines="none">
+          <ion-item>
+            <ion-button expand="block" color="success" size="default" style="width: 100%;" (click)="addGasto(miembro.nombre)">
+              <ion-icon name="add-circle-outline"></ion-icon>
+              Gasto
+            </ion-button>
+            <ion-button expand="block" color="danger" size="default" style="width: 100%;" (click)="addCobro(miembro.nombre)">
+              <ion-icon name="wallet-outline"></ion-icon>
+              Cobro
+            </ion-button>
+          </ion-item>
+          <ion-item *ngIf="miembro.pendiente && miembro.pendiente !== 0">
+            <ion-icon name="star" slot="start" color="warning"></ion-icon>
+            <ion-label>Pendiente</ion-label>
+            <ion-badge slot="end" color="dark" *ngIf="miembro.pendiente > 0">Debe recibir S/.{{miembro.pendiente| number : '1.2-2'}}</ion-badge>
+            <ion-badge slot="end" color="dark" *ngIf="miembro.pendiente < 0">Debe pagar S/.{{miembro.pendiente| number : '1.2-2'}}</ion-badge>
+          </ion-item>
+        </ion-list>
+      </div>
+    </ion-accordion>
+  </ion-accordion-group>
 </ion-content>
+<ion-footer>
+  <ion-toolbar>
+    <ion-button (click)="calcular()" expand="full" color="primary">
+      <ion-icon slot="start" name="star-half-outline"></ion-icon>
+      Calcular
+    </ion-button>
+  </ion-toolbar>   
+</ion-footer>

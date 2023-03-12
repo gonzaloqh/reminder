@@ -219,7 +219,6 @@ export class Tab3Page {
     if (this.obtenerTotal() != this.obtenerPagos()) {
       alert("El monto Total S/." + this.obtenerTotal() + " no coincide con los pagos realizados S/." + 
       this.obtenerPagos());
-      return;
     }
     let total : number = 0;
     let pagos : number = 0;

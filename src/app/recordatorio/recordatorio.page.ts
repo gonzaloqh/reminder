@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DeliveredNotifications, DeliveredNotificationSchema, LocalNotifications } from '@capacitor/local-notifications';
+import { DatabaseService } from '../services/database.service';
 
 @Component({
   selector: 'app-recordatorio',
@@ -9,12 +10,11 @@ import { DeliveredNotifications, DeliveredNotificationSchema, LocalNotifications
 })
 export class RecordatorioPage implements OnInit {
   id: string | null = "";
-  item : DeliveredNotificationSchema = {
-    id: 0,
-    title: '',
-    body: ''
+  item : Recordatorio = {
+    id: undefined,
+    titulo: undefined
   };
-  constructor(private activateRoute : ActivatedRoute, private router : Router) { }
+  constructor(private activateRoute : ActivatedRoute, private router : Router, private database : DatabaseService) { }
 
   ngOnInit() {
     this.activateRoute.paramMap.subscribe(paramMap => {
@@ -29,14 +29,14 @@ export class RecordatorioPage implements OnInit {
   }
 
   async getItemFromList() {
-    let temp : DeliveredNotificationSchema[] = await this.getList();
-    temp = temp.filter(item => item.id == Number(this.id));
-    if(temp.length == 0 ){
+    let temp = await this.database.get(this.id!);
+    if(!temp){
       alert("No se encontró el elemento");
       this.router.navigate(['/']);
     }
     else {
-      this.item = temp[0];
+      this.item.id = this.id!;
+      this.item.titulo = temp;
     }
   }
 
@@ -44,10 +44,24 @@ export class RecordatorioPage implements OnInit {
     return (await LocalNotifications.getDeliveredNotifications()).notifications;
   }
 
-  finalizar() {
+  async finalizar() {
+    let itemNotification : DeliveredNotificationSchema;
     try {
+      let temp : DeliveredNotificationSchema[] = await this.getList();
+      temp = temp.filter(item => item.id == Number(this.id));
+      if(temp.length == 0 ){
+        alert("No se encontró el elemento");
+        this.router.navigate(['/']);
+        return;
+      }
+      else {
+        itemNotification = temp[0];
+      }
+      //Eliminados de storage
+      this.database.remove(this.id!);
+
       let remove : DeliveredNotificationSchema[] = [];
-      remove.push(this.item);      
+      remove.push(itemNotification);      
       let rem :DeliveredNotifications = {
         notifications: remove
       };
@@ -62,4 +76,9 @@ export class RecordatorioPage implements OnInit {
       alert("Error al intentar cerrar el recordatorio.")
     }
   }
+}
+
+class Recordatorio {
+  id : String | undefined ;
+  titulo: String | undefined;
 }

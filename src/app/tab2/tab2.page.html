@@ -10,7 +10,7 @@
   <ion-list>
     <ion-item *ngFor="let item of recordatorios" [routerLink]="'/remind/' + item.id">
       <ion-badge slot="start">{{item.id}}</ion-badge>
-      <ion-label>{{item.body}}</ion-label>
+      <ion-label>{{item.titulo}}</ion-label>
     </ion-item>
   </ion-list>
 </ion-content>

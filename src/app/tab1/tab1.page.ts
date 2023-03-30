@@ -3,6 +3,7 @@ import { TextToSpeech } from '@capacitor-community/text-to-speech';
 import { SpeechRecognition } from "@capacitor-community/speech-recognition";
 import { DeliveredNotificationSchema, LocalNotifications, PendingLocalNotificationSchema, ScheduleOptions } from '@capacitor/local-notifications';
 import { Router } from '@angular/router';
+import { DatabaseService } from '../services/database.service';
 
 @Component({
   selector: 'app-tab1',
@@ -13,7 +14,7 @@ export class Tab1Page {
   titulo : string = "";
   recording = false;
 
-  constructor(private changeDetectorRef: ChangeDetectorRef, private router: Router) { 
+  constructor(private changeDetectorRef: ChangeDetectorRef, private router: Router, private database : DatabaseService) { 
     SpeechRecognition.requestPermission();
     LocalNotifications.addListener('localNotificationActionPerformed', (notification) => {
       this.guardarDina(notification.notification.title).then(asdasd => {
@@ -81,10 +82,11 @@ export class Tab1Page {
   }
 
   async guardar() {
+    let id_local = await this.getLastId();
     let opcions : ScheduleOptions = {
       notifications: [
         {
-          id: await this.getLastId(),
+          id: id_local,
           title: this.titulo,
           body: this.titulo,
           ongoing: true,
@@ -93,6 +95,8 @@ export class Tab1Page {
       ]
     }
 
+    //Guardar la notificacion en storage
+    this.database.set(String(id_local), this.titulo);
     
     LocalNotifications.schedule(opcions).then(() =>{
       this.titulo = "";
